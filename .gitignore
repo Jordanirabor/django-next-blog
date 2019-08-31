@@ -1,0 +1,4 @@
+*.sqlite3
+backend/.env
+frontend/node_modules/
+frontend/.next/

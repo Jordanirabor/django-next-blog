@@ -1,0 +1,26 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[scripts]
+project = "django-admin startproject"
+application = "python manage.py startapp"
+server = "python manage.py runserver"
+makemigrations = "python manage.py makemigrations"
+migrate = "python manage.py migrate"
+createsuperuser = "python manage.py createsuperuser"
+
+[packages]
+django = "*"
+djangorestframework = "==3.9.4"
+django-cors-headers = "*"
+cloudinary = "*"
+pillow = "*"
+djoser = "==1.7.0"
+djangorestframework-simplejwt = "==4.3.0"
+
+[requires]
+python_version = "3.6"
