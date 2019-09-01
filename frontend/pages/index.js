@@ -6,40 +6,21 @@ import { Row, Col, Button } from 'antd';
 import Link from 'next/link'; // add this
 import PageLayout from '../components/PageLayout';
 import PostCard from '../components/PostCard';
+import { connect } from "react-redux";            // add this
+import { fetchPosts } from "../actions/posts";    // add this
 
-const posts = [
-    {
-        id: 1,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558977800/cap-amer_dz6cff.jpg',
-        title: 'Captain America',
-        author: 'Jordan'
-    },
-    {
-        id: 2,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978023/ironman_dwalhj.jpg',
-        title: 'Ironman',
-        author: 'Carl'
-    },
-    {
-        id: 3,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978027/black-widow_emwmzt.jpg',
-        title: 'Black Widow',
-        author: 'Chris'
-    },
-    {
-        id: 4,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978032/thor_krwpdg.jpg',
-        title: 'Thor',
-        author: 'Matt'
-    }
-];
+
 
 class HomePage extends Component {
+
+    // add this
+    static async getInitialProps(ctx) {
+        const { store } = ctx;
+        await store.dispatch(fetchPosts())
+    }
+
     render() {
+        const { posts } = this.props  // add this
         return (
             <PageLayout>
                 <Row style={{ marginBottom: 64 }}>
@@ -72,4 +53,11 @@ class HomePage extends Component {
     }
 }
 
-export default HomePage;
+
+// add this
+const mapStateToProps = state => ({
+    posts: state.posts.data
+})
+
+// update this
+export default connect(mapStateToProps, null)(HomePage) 

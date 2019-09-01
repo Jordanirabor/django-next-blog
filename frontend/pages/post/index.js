@@ -6,58 +6,20 @@ import Link from 'next/link'; // add this
 import { Avatar, Button } from 'antd';
 import PageLayout from '../../components/PageLayout';
 import CommentSection from '../../components/CommentSection';
-
-const comments = [
-    {
-        author: 'Han Solo',
-        avatar: <Avatar>H</Avatar>,
-        content: <p>Nice and interesting writeup</p>,
-        datetime: '30 seconds ago'
-    }
-];
-
-
-const posts = [
-    {
-        id: 1,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558977800/cap-amer_dz6cff.jpg',
-        title: 'Captain America',
-        author: 'Jordan'
-    },
-    {
-        id: 2,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978023/ironman_dwalhj.jpg',
-        title: 'Ironman',
-        author: 'Carl'
-    },
-    {
-        id: 3,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978027/black-widow_emwmzt.jpg',
-        title: 'Black Widow',
-        author: 'Chris'
-    },
-    {
-        id: 4,
-        header_image:
-            'https://res.cloudinary.com/hotels-ng/image/upload/v1558978032/thor_krwpdg.jpg',
-        title: 'Thor',
-        author: 'Matt'
-    }
-];
+import moment from 'moment';                           // add this
+import { connect } from 'react-redux';                  // add this
+import { fetchPost } from '../../actions/activePost';   // add this
 
 
 class SinglePostPage extends Component {
     state = { commentValue: '' };
 
 
-    // add this method
-    static async getInitialProps({ query }) {
-        const { id } = query;
-        const post = posts.find(post => post.id == id)
-        return { post }
+
+    // update this method
+    static async getInitialProps({ query, store }) {
+        const { id } = query
+        await store.dispatch(fetchPost(id));
     }
 
     handleTextChange = e => {
@@ -73,6 +35,7 @@ class SinglePostPage extends Component {
     render() {
         const { commentValue } = this.state;
         const { post } = this.props; // add this
+        const { comments } = post    // add this
 
         return (
             <PageLayout>
@@ -93,34 +56,21 @@ class SinglePostPage extends Component {
                     <Avatar size={48} className="author-box__image">
                         H
           </Avatar>
-                    <div className="author-box__text">
-                        <h3>Han Solo</h3>
-                        <small>20th April 2019</small>
+
+                    <div className="author-box">
+                        <Avatar size={48} className="author-box__image">
+                            {post.author[0].toUpperCase()}
+                        </Avatar>
+                        <div className="author-box__text">
+                            <h3>{post.author}</h3>
+                            {/* Add this */}
+                            <small>{moment(post.created).format('MMMM DD YYYY')}</small>
+                        </div>
                     </div>
                 </div>
                 <section className="post-content">
-                    <p>
-                        Magna cupidatat qui incididunt qui laborum duis aliqua laboris
-                        ullamco cupidatat ipsum aliqua. Minim ex laborum commodo veniam
-                        voluptate consequat officia ea excepteur veniam ut nisi. Id duis
-                        consectetur est cillum nostrud laborum reprehenderit in voluptate
-                        aliquip Lorem anim velit labore. Consectetur incididunt elit eu ad
-                        qui laborum id. Incididunt anim in ea mollit et in exercitation
-                        excepteur consequat aliqua amet. Incididunt nulla in qui magna
-                        voluptate voluptate irure minim officia nostrud. Ipsum veniam anim
-                        Lorem nisi in aute id magna Lorem ipsum irure est id.
-          </p>
-                    <p>
-                        Magna cupidatat qui incididunt qui laborum duis aliqua laboris
-                        ullamco cupidatat ipsum aliqua. Minim ex laborum commodo veniam
-                        voluptate consequat officia ea excepteur veniam ut nisi. Id duis
-                        consectetur est cillum nostrud laborum reprehenderit in voluptate
-                        aliquip Lorem anim velit labore. Consectetur incididunt elit eu ad
-                        qui laborum id. Incididunt anim in ea mollit et in exercitation
-                        excepteur consequat aliqua amet. Incididunt nulla in qui magna
-                        voluptate voluptate irure minim officia nostrud. Ipsum veniam anim
-                        Lorem nisi in aute id magna Lorem ipsum irure est id.
-          </p>
+                    {/* Add this */}
+                    <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 </section>
                 <section className="comment-section">
                     <CommentSection
@@ -181,4 +131,10 @@ class SinglePostPage extends Component {
     }
 }
 
-export default SinglePostPage;
+// add this
+const mapStateToProps = state => ({
+    post: state.activePost.data
+});
+
+// update this
+export default connect(mapStateToProps, null)(SinglePostPage)
