@@ -6,8 +6,9 @@ import Link from 'next/link'        // add this
 import { Layout, Row, Col, Typography, Button } from 'antd';
 const { Header, Content } = Layout;
 const { Title } = Typography;
+import { connect } from 'react-redux';  // add this
 
-const PageLayout = ({ children }) => {
+const PageLayout = ({ children, user }) => {
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <Header style={{ color: '#fff', height: 60 }}>
@@ -28,12 +29,16 @@ const PageLayout = ({ children }) => {
                         >
                             MarvelBlogly
             </Title>
+
                         <div>
-                            <Link href='/auth'>
-                                <Button href="/auth" type="primary">
-                                    Auth
-              </Button>
-                            </Link>
+                            {/* Add this */}
+                            {
+                                !user ?
+                                    <Link href="/auth">
+                                        <Button type="primary">Auth</Button>
+                                    </Link> :
+                                    <h3 style={{ color: '#fff' }}> {user && user.username} </h3>
+                            }
                         </div>
                     </Col>
                 </Row>
@@ -47,4 +52,9 @@ const PageLayout = ({ children }) => {
     );
 };
 
-export default PageLayout;
+
+const mapStateToProps = state => ({                          // add this
+    user: state.auth.user
+})
+
+export default connect(mapStateToProps, null)(PageLayout);   // add this

@@ -2,9 +2,14 @@
 // pages/auth.js
 
 import React, { Component } from "react";
-import { Col, Card, Row, Button, Input, Icon, Typography } from "antd";
+import { Col, Card, Row, Button, Input, Icon, Typography, notification } from "antd";
+import { connect } from 'react-redux'        // add this
+import { loginUser, createUser } from '../actions/auth' // add createUser
+import Router from 'next/router'            // add this
 const ButtonGroup = Button.Group;
 const { Title } = Typography;
+
+
 class AuthPage extends Component {
   state = {
     action: "Register",
@@ -17,8 +22,42 @@ class AuthPage extends Component {
   };
 
   handleChange = e => {
-      const { name, value } = e.target
-      this.setState({ [name]: value })
+    const { name, value } = e.target
+    this.setState({ [name]: value })
+  }
+
+
+  // add this method
+  handleSubmit = async () => {
+    const { username, password, action } = this.state
+    if (action == 'Login') {
+      await this.props.loginUser({ username, password })
+    }
+
+    // add this conditional statement
+    if (action == 'Register') {
+      await this.props.createUser({ username, password })
+    }
+
+    // add this method
+    if (this.props.errors) {
+      for (let msg of this.props.errors) {
+        notification.error({
+          message: msg,
+          duration: 3
+        })
+      }
+      return;
+    }
+    // add this method
+    if (this.props.isAuthenticated) {
+      const infoMsg = `${action == 'Login' ? 'Logged in' : 'Created'} Successfully`
+      notification.success({
+        message: infoMsg,
+        duration: 3
+      })
+      Router.push('/')
+    }
   }
 
   render() {
@@ -69,7 +108,13 @@ class AuthPage extends Component {
                   type="password"
                 />
               </div>
-              <Button type="primary">Submit</Button>
+
+              <Button
+                onClick={this.handleSubmit}
+                loading={this.props.loading}
+                type='primary'>
+                Submit
+          </Button>
             </div>
           </Card>
         </Col>
@@ -78,4 +123,16 @@ class AuthPage extends Component {
   }
 }
 
-export default AuthPage;
+
+// add this
+const mapStateToProps = state => ({
+  isAuthenticated: state.auth.isAuthenticated,
+  loading: state.auth.loading,
+  errors: state.auth.errors
+})
+
+// add this
+const mapDispatchToProps = { loginUser, createUser }     // add createUser
+
+// add this
+export default connect(mapStateToProps, mapDispatchToProps)(AuthPage)

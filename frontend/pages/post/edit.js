@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import dynamic from "next/dynamic";             // add this
 import { Button, Col, Icon, Input, Modal, Row, Upload, Typography } from "antd";
 import PageLayout from "../../components/PageLayout"; // update the path
+import withAuthSync from "../../hocs/withAuthSync"; // add this
 
 const { Title } = Typography;
 const Editor = dynamic(() => import("../../components/Editor"), { // update the path 
