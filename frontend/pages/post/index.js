@@ -8,7 +8,7 @@ import PageLayout from '../../components/PageLayout';
 import CommentSection from '../../components/CommentSection';
 import moment from 'moment';                           // add this
 import { connect } from 'react-redux';                  // add this
-import { fetchPost } from '../../actions/activePost';   // add this
+import { fetchPost, createComment } from "../../actions/activePost";
 
 
 class SinglePostPage extends Component {
@@ -27,22 +27,38 @@ class SinglePostPage extends Component {
             commentValue: e.target.value
         });
     };
-    handleSubmit = () => {
-        if (!this.state.value) {
+
+
+    handleSubmit = async () => {
+        const { commentValue } = this.state;
+        const {
+            post: { id },
+            createComment
+        } = this.props;
+
+        if (!commentValue) {
             return;
         }
+        await createComment({ content: commentValue, post: id });
+        this.setState({ commentValue: "" });
     };
+
     render() {
         const { commentValue } = this.state;
-        const { post } = this.props; // add this
+        const { post, user, loading } = this.props;   // add loading
         const { comments } = post    // add this
 
         return (
             <PageLayout>
                 <div style={{ textAlign: 'right', marginBottom: 16 }}>
-                    <Link href={`/post/edit?id=${post.id}`} as={`/post/${post.id}/edit`}>
-                        <Button type="primary">Edit Post</Button>
-                    </Link>
+                    {user && user.username == post.author ? (
+                        <Link
+                            href={`/post/edit?id=${post.id}`}
+                            as={`/post/${post.id}/edit`}
+                        >
+                            <Button type="primary">Edit Post</Button>
+                        </Link>
+                    ) : null}
                 </div>
                 <div className="hero">
 
@@ -73,13 +89,15 @@ class SinglePostPage extends Component {
                     <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 </section>
                 <section className="comment-section">
+
+
                     <CommentSection
                         onChange={this.handleTextChange}
                         comments={comments}
                         onSubmit={this.handleSubmit}
                         commentText={commentValue}
-                        submitting={false}
-                        user="Han Solo"
+                        submitting={loading}    // update this
+                        user={user && user.username}    // update this
                     />
                 </section>
                 <style jsx>
@@ -131,10 +149,19 @@ class SinglePostPage extends Component {
     }
 }
 
-// add this
+
 const mapStateToProps = state => ({
-    post: state.activePost.data
+    post: state.activePost.data,
+    user: state.auth.user,
+    loading: state.activePost.loading    // add this
 });
 
-// update this
-export default connect(mapStateToProps, null)(SinglePostPage)
+// add this
+const mapDispatchToProps = {
+    createComment
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps  //update this
+)(SinglePostPage);

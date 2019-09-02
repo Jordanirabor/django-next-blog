@@ -3,17 +3,41 @@
 
 import React, { Component } from "react";
 import dynamic from "next/dynamic";             // add this
-import { Button, Col, Icon, Input, Modal, Row, Upload, Typography } from "antd";
+import { Button, Col, Icon, Input, Modal, Row, Upload, Typography, notification } from "antd";
 import PageLayout from "../../components/PageLayout"; // update the path
 import withAuthSync from "../../hocs/withAuthSync"; // add this
+import { connect } from "react-redux";                  // add this
+import Router from 'next/router'                       // add this
+import { editPost, fetchPost } from '../../actions/activePost'   // add this
 
 const { Title } = Typography;
 const Editor = dynamic(() => import("../../components/Editor"), { // update the path 
     ssr: false
-  });
+});
 
 class EditPage extends Component {
-    state = { title: '', fileList: [], editorHtml: '' };  // add editorHtml and title to state
+
+    // add this
+    constructor(props) {
+        super(props);
+        const { post } = props;
+        this.state = {
+            fileList: [],
+            editorHtml: (post && post.content) || "",
+            title: post && post.title
+        };
+    }
+
+    // add this
+    static async getInitialProps(ctx) {
+        const { query, store } = ctx;
+        const { id } = query;
+        const post = store.getState().activePost.data;
+        if (!post) {
+            await store.dispatch(fetchPost(id));
+        }
+        return {};
+    }
 
     handleImagePreview = file => {
         this.setState({
@@ -31,6 +55,37 @@ class EditPage extends Component {
     handleImagePreviewCancel = () => this.setState({ previewVisible: false });
 
     handleImageChange = ({ fileList }) => this.setState({ fileList });
+
+
+    // add this
+    handleSubmit = async () => {
+        const { title, editorHtml, fileList } = this.state;
+        const { post } = this.props;
+
+        let formData = new FormData();
+        formData.append("title", title);
+        formData.append("content", editorHtml);
+        if (fileList[0]) {
+            formData.append("header_image", fileList[0].originFileObj);
+        }
+
+        const postId = await this.props.editPost(post.id, formData);
+
+        if (this.props.errors) {
+            for (let msg of this.props.errors) {
+                notification.error({
+                    message: msg,
+                    duration: 3
+                });
+            }
+            return;
+        }
+        notification.success({
+            message: "Post edited successfully",
+            duration: 3
+        });
+        return Router.push(`/post/${postId}`);
+    };
 
     render() {
         const { previewImage, previewVisible, fileList, title } = this.state;
@@ -85,7 +140,13 @@ class EditPage extends Component {
                                     value={this.state.editorHtml}
                                 />
                             </div>
-                            <Button type="primary"> Post </Button>
+
+                            <Button
+                                loading={this.props.loading}
+                                onClick={this.handleSubmit}
+                                type="primary">
+                                Post
+                </Button>
                         </div>
                     </Col>
                 </Row>
@@ -93,4 +154,18 @@ class EditPage extends Component {
         );
     }
 }
-export default EditPage;
+
+
+
+// add this
+const mapStateToProps = state => ({
+    post: state.activePost.data,
+    loading: state.posts.loading,
+    errors: state.posts.errors
+});
+
+// add this
+const mapDispatchToProps = { editPost };
+
+//update this
+export default connect(mapStateToProps, mapDispatchToProps)(withAuthSync(EditPage))

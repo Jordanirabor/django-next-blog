@@ -3,17 +3,48 @@
 
 import React, { Component } from "react";
 import dynamic from "next/dynamic";             // add this
-import { Button, Col, Icon, Input, Modal, Row, Upload, Typography } from "antd";
+import { Button, Col, Icon, Input, Modal, Row, Upload, Typography, notification } from "antd";
 import PageLayout from "../components/PageLayout";
 import withAuthSync from "../hocs/withAuthSync"; // add this
+import { connect } from 'react-redux'               // add this
+import Router from 'next/router'                    // add this
+import { createPost } from '../actions/activePost'  // add this
 
 const { Title } = Typography;
 const Editor = dynamic(() => import("../components/Editor"), { // add this
     ssr: false
-  });
+});
 
 class CreatePage extends Component {
     state = { title: '', fileList: [], editorHtml: '' };  // add editorHtml and title to state
+
+
+    // add this method
+    handleSubmit = async () => {
+        const { title, editorHtml, fileList } = this.state;
+
+        let formData = new FormData()
+        formData.append('title', title)
+        formData.append('content', editorHtml)
+        formData.append('header_image', fileList[0] && fileList[0].originFileObj)
+
+        const postId = await this.props.createPost(formData)
+
+        if (this.props.errors) {
+            for (let msg of this.props.errors) {
+                notification.error({
+                    message: msg,
+                    duration: 3
+                });
+            }
+            return;
+        }
+        notification.success({
+            message: 'Post created successfully',
+            duration: 3
+        })
+        Router.push(`/post/${postId}`)
+    }
 
     handleImagePreview = file => {
         this.setState({
@@ -85,7 +116,13 @@ class CreatePage extends Component {
                                     value={this.state.editorHtml}
                                 />
                             </div>
-                            <Button type="primary"> Post </Button>
+                            {/* update the Post Button accordingly*/}
+                            <Button
+                                loading={this.props.loading}
+                                onClick={this.handleSubmit}
+                                type="primary">
+                                Post
+              </Button>
                         </div>
                     </Col>
                 </Row>
@@ -95,4 +132,17 @@ class CreatePage extends Component {
 }
 
 
-export default withAuthSync(CreatePage)
+
+// add this
+const mapStateToProps = state => ({
+    loading: state.activePost.loading,
+    errors: state.activePost.errors
+})
+
+// add this
+const mapDispatchToProps = {
+    createPost
+}
+
+// update this 
+export default connect(mapStateToProps, mapDispatchToProps)(withAuthSync(CreatePage));

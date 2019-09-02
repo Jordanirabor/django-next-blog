@@ -22,20 +22,25 @@ const CommentList = ({ comments }) => (
   />
 );
 
-const CommentEditor = ({ onChange, onSubmit, submitting, value }) => (
+const CommentEditor = ({ onChange, onSubmit, submitting, value, user }) => (
   <div>
     <Form.Item>
       <TextArea rows={4} onChange={onChange} value={value} />
     </Form.Item>
     <Form.Item>
-      <Button
-        htmlType="submit"
-        loading={submitting}
-        onClick={onSubmit}
-        type="primary"
-      >
-        Add Comment
-      </Button>
+      {/* update the ADD Comment Button as so */}
+      {user ? (
+        <Button
+          htmlType="submit"
+          loading={submitting}
+          onClick={onSubmit}
+          type="primary"
+        >
+          Add Comment
+        </Button>
+      ) : (
+          <p>You need to be signed in to comment</p>
+        )}
     </Form.Item>
   </div>
 );
@@ -59,6 +64,7 @@ const CommentSection = props => {
             onSubmit={onSubmit}
             submitting={submitting}
             value={commentText}
+            user={user}    // add this
           />
         }
       />
