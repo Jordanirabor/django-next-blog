@@ -21,6 +21,9 @@ cloudinary = "*"
 pillow = "*"
 djoser = "==1.7.0"
 djangorestframework-simplejwt = "==4.3.0"
+psycopg2 = "==2.7.7"
+gunicorn = "*"
+django-heroku = "*"
 
 [requires]
 python_version = "3.6"

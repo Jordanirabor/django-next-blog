@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import cloudinary       # add this
-from datetime import timedelta # add this
+from datetime import timedelta  # add this
+import django_heroku          # add this
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',  # add this
     'cloudinary',     # add this
     'api',  # add this
+
 ]
 
 # add this
@@ -57,15 +59,16 @@ REST_FRAMEWORK = {
 
 # add this
 SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
-   'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-   'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 
 # add this
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',  # our client will run on this domain, thus we whitelist it
+    'https://protected-brushlands-59901.herokuapp.com'
 )
 
 # add this
@@ -154,6 +157,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+
 STATIC_URL = '/static/'
+
+django_heroku.settings(locals())     # add this
 
 AUTH_USER_MODEL = 'api.User'  # add this
