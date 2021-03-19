@@ -15,7 +15,7 @@ createsuperuser = "python manage.py createsuperuser"
 
 [packages]
 django = "*"
-djangorestframework = "==3.9.4"
+djangorestframework = "==3.11.2"
 django-cors-headers = "*"
 cloudinary = "*"
 pillow = "*"
